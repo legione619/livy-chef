@@ -21,17 +21,42 @@ livy.server.session.timeout = 8600000000
 # If livy should impersonate the requesting users when creating a new session.
 livy.impersonation.enabled = true
 
-livy.server.csrf_protection.enabled = false
+livy.server.csrf-protection.enabled = false
 
 # Comma-separated list of Livy RSC jars. By default Livy will upload jars from its installation
 # directory every time a session is started. By caching these files in HDFS, for example, startup
 # time of sessions on YARN can be reduced.
-#livy.jars = hdfs://<%= @nn_endpoint %>/<%= node['hops']['hdfs']['user_home'] %>/<%= node['livy']['user'] %>/livy/rsc-jars
+livy.rsc.jars = local://<%= node['livy']['base_dir'] %>/rsc-jars/livy-api.jar,local://<%= node['livy']['base_dir'] %>/rsc-jars/livy-rsc.jar,local://<%= node['livy']['base_dir'] %>/rsc-jars/netty-all.jar
 
 # Comma-separated list of Livy REPL jars. By default Livy will upload jars from its installation
 # directory every time a session is started. By caching these files in HDFS, for example, startup
 # time of sessions on YARN can be reduced.
-#livy.repl.jars = hdfs://<%= @nn_endpoint %>/<%= node['hops']['hdfs']['user_home'] %>/<%= node['livy']['user'] %>/livy/rpl-jars
+livy.repl.jars = local://<%= node['livy']['base_dir'] %>/repl_2.11-jars/commons-codec.jar,local://<%= node['livy']['base_dir'] %>/repl_2.11-jars/livy-core.jar,local://<%= node['livy']['base_dir'] %>/repl_2.11-jars/livy-repl.jar
+
+# Comma-separated list of Livy Datanucleus jars. By default Livy will upload jars from its installation
+# directory every time a session is started. By caching these files in HDFS, for example, startup
+# time of sessions on YARN can be reduced.
+livy.datanucleus.jars = local://<%= node['hadoop_spark']['base_dir'] %>/jars/datanucleus-api.jar,local://<%= node['hadoop_spark']['base_dir'] %>/jars/datanucleus-core.jar
+,local://<%= node['hadoop_spark']['base_dir'] %>/jars/datanucleus-rdbms.jar
+
+# Location of PySpark archives. By default Livy will upload the file from SPARK_HOME, but
+# by caching the file in HDFS, startup time of PySpark sessions on YARN can be reduced.
+livy.rsc.pyspark.archives = local://<%= node['hadoop_spark']['base_dir'] %>/python/lib/pyspark.zip,local://<%= node['hadoop_spark']['base_dir'] %>/python/lib/py4j-src.zip
+
+# Location of the SparkR package. By default Livy will upload the file from SPARK_HOME, but
+# by caching the file in HDFS, startup time of R sessions on YARN can be reduced.
+livy.rsc.sparkr.package = local://<%= node['hadoop_spark']['base_dir'] %>/R/lib/sparkr.zip
+
+
+# Comma-separated list of Livy RSC jars. By default Livy will upload jars from its installation
+# directory every time a session is started. By caching these files in HDFS, for example, startup
+# time of sessions on YARN can be reduced.
+#livy.jars = hdfs://<%= @nn_endpoint %>/<%= node['hops']['hdfs']['user_home'] %>/<%= node['livy']['user'] %>/apache-livy/rsc-jars
+
+# Comma-separated list of Livy REPL jars. By default Livy will upload jars from its installation
+# directory every time a session is started. By caching these files in HDFS, for example, startup
+# time of sessions on YARN can be reduced.
+#livy.repl.jars = hdfs://<%= @nn_endpoint %>/<%= node['hops']['hdfs']['user_home'] %>/<%= node['livy']['user'] %>/apache-livy/rpl-jars
 
 # Location of PySpark archives. By default Livy will upload the file from SPARK_HOME, but
 # by caching the file in HDFS, startup time of PySpark sessions on YARN can be reduced.
@@ -52,7 +77,7 @@ livy.server.recovery.state-store=filesystem
 
 livy.server.recovery.state-store.url = file://<%= node['livy']['base_dir'] %>/logs
 
-livy.repl.enableHiveContext = true
+livy.repl.enable-hive-context = true
 
 #RPC size properties, for large installations it might have to be further increased. Set default to 256MB
 livy.rsc.rpc.max.size= <%= node['livy']['rsc']['rpc']['max']['size'] %>
