@@ -69,7 +69,12 @@ template "#{node['livy']['base_dir']}/bin/stop-livy.sh" do
   mode 0751
 end
 
-
+template "#{node['livy']['base_dir']}/bin/livy-health.sh" do
+  source "livy-health.sh.erb"
+  owner node['livy']['user']
+  group node['livy']['group']
+  mode 0555
+end
 
 case node['platform']
 when "ubuntu"
@@ -96,11 +101,22 @@ if node['livy']['systemd'] == "true"
     systemd_script = "/lib/systemd/system/#{service_name}.service"
   end
 
+  deps = ""
+  if exists_local("hops", "rm")
+    deps += "resourcemanager.service "
+  end
+
+  rpc_resourcemanager_fqdn = consul_helper.get_service_fqdn("rpc.resourcemanager")
+  
   template systemd_script do
     source "#{service_name}.service.erb"
     owner "root"
     group "root"
     mode 0754
+    variables({
+                :deps => deps,
+                :rm_rpc_endpoint => rpc_resourcemanager_fqdn
+    })
 if node['services']['enabled'] == "true"
     notifies :enable, resources(:service => service_name)
 end
@@ -144,4 +160,9 @@ end
 # Upgrade will have a restart for free...
 livy_restart "restart-livy-needed" do
   action :restart
+end
+
+consul_service "Registering Livy with Consul" do
+  service_definition "livy-consul.hcl.erb"
+  action :register
 end

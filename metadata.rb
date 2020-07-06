@@ -4,16 +4,17 @@ maintainer_email "jdowling@kth.se"
 license          "Apache v2"
 description      'Installs/Configures Livy Server'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          "1.2.0"
+version          "1.3.0"
 source_url       "https://github.com/hopshadoop/livy-chef"
 
 
-
-depends          "hadoop_spark"
-depends          "ndb"
-depends          "hops"
-depends          "kagent"
-depends          "java"
+depends "java", '~> 7.0.0'
+depends 'kagent'
+depends 'hops'
+depends 'ndb'
+depends 'hadoop_spark'
+depends 'conda'
+depends 'consul'
 
 recipe           "install", "Installs a Livy Spark REST Server"
 recipe           "default", "Starts  a Livy Spark REST Server"
