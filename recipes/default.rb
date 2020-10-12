@@ -1,9 +1,15 @@
 
 my_ip = my_private_ip()
 nn_endpoint = private_recipe_ip("hops", "nn") + ":#{node['hops']['nn']['port']}"
+
+kagent_hopsify "Generate x.509" do
+  user node['livy']['user']
+  crypto_directory x509_helper.get_crypto_dir(node['livy']['user'])
+  action :generate_x509
+  not_if { node["kagent"]["test"] == true }
+end
+
 home = node['hops']['hdfs']['user_home']
-
-
 livy_dir="#{home}/#{node['livy']['user']}"
 hops_hdfs_directory "#{livy_dir}" do
   action :create_as_superuser
@@ -25,7 +31,7 @@ end
 template "#{node['livy']['base_dir']}/conf/livy.conf" do
   source "livy.conf.erb"
   owner node['livy']['user']
-  group node['livy']['group']
+  group node['hops']['group']
   mode 0655
   variables({
         :private_ip => my_ip,
@@ -36,7 +42,7 @@ end
 template "#{node['livy']['base_dir']}/conf/log4j.properties" do
   source "log4j.properties.erb"
   owner node['livy']['user']
-  group node['livy']['group']
+  group node['hops']['group']
   mode 0655
 end
 
@@ -44,28 +50,28 @@ end
 template "#{node['livy']['base_dir']}/conf/spark-blacklist.conf" do
   source "spark-blacklist.conf.erb"
   owner node['livy']['user']
-  group node['livy']['group']
+  group node['hops']['group']
   mode 0655
 end
 
 template "#{node['livy']['base_dir']}/conf/livy-env.sh" do
   source "livy-env.sh.erb"
   owner node['livy']['user']
-  group node['livy']['group']
+  group node['hops']['group']
   mode 0655
 end
 
 template "#{node['livy']['base_dir']}/bin/start-livy.sh" do
   source "start-livy.sh.erb"
   owner node['livy']['user']
-  group node['livy']['group']
+  group node['hops']['group']
   mode 0751
 end
 
 template "#{node['livy']['base_dir']}/bin/stop-livy.sh" do
   source "stop-livy.sh.erb"
   owner node['livy']['user']
-  group node['livy']['group']
+  group node['hops']['group']
   mode 0751
 end
 
@@ -105,9 +111,10 @@ if node['livy']['systemd'] == "true"
   if exists_local("hops", "rm")
     deps += "resourcemanager.service "
   end
-
-  rpc_resourcemanager_fqdn = consul_helper.get_service_fqdn("rpc.resourcemanager")
+  deps += "consul.service "
   
+  rpc_resourcemanager_fqdn = consul_helper.get_service_fqdn("rpc.resourcemanager")
+
   template systemd_script do
     source "#{service_name}.service.erb"
     owner "root"
