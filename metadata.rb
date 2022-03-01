@@ -4,7 +4,7 @@ maintainer_email "jdowling@kth.se"
 license          "Apache v2"
 description      'Installs/Configures Livy Server'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          "2.3.0"
+version          "2.5.0"
 source_url       "https://github.com/hopshadoop/livy-chef"
 
 
@@ -22,6 +22,10 @@ recipe           "purge", "Removes and deletes an installed Livy Spark REST Serv
 
 attribute "livy/user",
           :description => "User to install/run as",
+          :type => 'string'
+
+attribute "livy/user_id",
+          :description => "livy user id. Default: 1518",
           :type => 'string'
 
 attribute "livy/user-home",
